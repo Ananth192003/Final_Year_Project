@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Module 4</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            display: flex; 
+            height: 100vh; 
+            margin: 0; 
+            background: #f4f4f4; 
+        }
+        .sidebar { 
+            width: 250px; 
+            background: #0b3d91; 
+            color: white; 
+            height: 100vh; 
+            padding: 20px; 
+        }
+        .sidebar h2 { 
+            text-align: center; 
+            font-size: 22px; 
+            margin-bottom: 20px; 
+            border-bottom: 2px solid white; 
+            padding-bottom: 10px; 
+        }
+        .sidebar ul { 
+            list-style: none; 
+            padding: 0; 
+        }
+        .sidebar ul li { 
+            padding: 15px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            border-bottom: 1px solid #1a55b3; 
+            transition: background 0.3s ease; 
+        }
+        .sidebar ul li:hover { 
+            background: #1a55b3; 
+        }
+        .content { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 40px; 
+            background: white; 
+            flex-direction: column; 
+        }
+        iframe { 
+            width: 80%; 
+            height: 500px; 
+            border: none; 
+            display: none; 
+        }
+        .quiz-container { 
+            max-width: 600px; 
+            background: #e0e0e0; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            text-align: center; 
+            display: none; 
+        }
+        .question { 
+            font-size: 22px; 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: #0b3d91; 
+        }
+        .options { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+        }
+        .option-btn { 
+            background: #0b3d91; 
+            color: white; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            transition: background 0.3s ease; 
+        }
+        .option-btn:hover { 
+            background: #07306d; 
+        }
+        .result { 
+            font-size: 18px; 
+            font-weight: bold; 
+            margin-top: 10px; 
+        }
+        #next-button { 
+            display: none; 
+            background: #00897B; 
+            color: white; 
+            padding: 12px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-top: 15px; 
+        }
+        #next-button:hover { 
+            background: #006f5c; 
+        }
+        #probability { 
+            font-size: 18px; 
+            font-weight: bold; 
+            margin-top: 15px; 
+            color: #1A237E; 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Chemistry Learning</h2>
+        <ul>
+            <li onclick="loadModule('module1.pdf')">Module 1</li>
+            <li onclick="loadModule('module2.pdf')">Module 2</li>
+            <li onclick="startQuiz(1)">Quiz 1</li>
+            <li onclick="loadModule('module3.pdf')">Module 3</li>
+            <li onclick="loadModule('module4.pdf')">Module 4</li>
+            <li onclick="startQuiz(2)">Quiz 2</li>
+            <li onclick="startQuiz(3)">Quiz 3</li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <iframe id="moduleFrame"></iframe>
+        <div class="quiz-container" id="quiz">
+            <h2>Chemistry Quiz</h2>
+            <p id="question-text" class="question">Loading question...</p>
+            <div id="options-container" class="options"></div>
+            <p id="result" class="result"></p>
+            <button id="next-button" onclick="nextQuestion()">Next</button>
+            <p id="probability"></p>
+        </div>
+    </div>
+
+    <script>
+        function loadModule(pdf) {
+            let moduleFrame = document.getElementById("moduleFrame");
+            moduleFrame.src = pdf;
+            moduleFrame.style.display = "block";
+            document.getElementById("quiz").style.display = "none";
+        }
+
+        let currentQuestionIndex = 0;
+        let quizType = 1;
+        let totalScore = 0;
+
+        const questions = [
+            {"question": "What is the atomic number of Hydrogen?", "options": ["1", "2", "3", "4"], "correct": "1"},
+            {"question": "Which gas is most abundant in Earth's atmosphere?", "options": ["Oxygen", "Nitrogen", "Carbon Dioxide", "Argon"], "correct": "Nitrogen"},
+            {"question": "What is the chemical formula of water?", "options": ["H2O", "CO2", "O2", "H2"], "correct": "H2O"},
+            {"question": "What is the speed of light in vacuum?", "options": ["3x10^8 m/s", "3x10^6 m/s", "3x10^4 m/s", "3x10^2 m/s"], "correct": "3x10^8 m/s"},
+            {"question": "What is the pH of pure water?", "options": ["7", "5", "9", "2"], "correct": "7"}
+        ];
+
+        function startQuiz(type) {
+            quizType = type;
+            document.getElementById("quiz").style.display = "block";
+            document.getElementById("moduleFrame").style.display = "none";
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            updateQuestion();
+        }
+
+        function updateQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                let probability = (totalScore / questions.length) * 100;
+                document.getElementById("probability").innerText = `📊 Quiz Score: ${probability.toFixed(1)}%`;
+                document.getElementById("probability").style.display = "block";
+                document.getElementById("next-button").style.display = "none";
+                
+                if (probability >= 60) {
+                    document.getElementById("result").innerText = "✅ Great job! You can proceed to the next module.";
+                    setTimeout(() => {
+                        window.location.href = "chem-5.html";
+                    }, 2000);
+                } else {
+                    document.getElementById("result").innerText = "❗ Please review the module and try again.";
+                }
+                return;
+            }
+
+            let questionData = questions[currentQuestionIndex];
+            document.getElementById("question-text").innerText = questionData.question;
+            let optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+
+            questionData.options.forEach(option => {
+                let button = document.createElement("button");
+                button.innerText = option;
+                button.classList.add("option-btn");
+                button.onclick = () => {
+                    if (option === questionData.correct) {
+                        totalScore++;
+                        document.getElementById("result").innerText = "✅ Correct!";
+                    } else {
+                        document.getElementById("result").innerText = "❌ Incorrect!";
+                    }
+                    currentQuestionIndex++;
+                    setTimeout(updateQuestion, 1000);
+                };
+                optionsContainer.appendChild(button);
+            });
+        }
+    </script>
+</body>
+</html>

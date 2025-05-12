@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step-by-Step Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #0d0d3d, #161650);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+        .question-container {
+            display: none;
+        }
+        .progress-container {
+            margin: 10px 0;
+            text-align: left;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #fff;
+            border-radius: 5px;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            position: absolute;
+        }
+        .blue { background: #00bcd4; }
+        .red { background: #ff4081; }
+        .orange { background: #ff9800; }
+        .purple { background: #673ab7; }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: white;
+            color: #0d0d3d;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Step-by-Step Quiz</h2>
+
+        <div id="question-section">
+            <div class="question-container" id="q1">
+                <p>1. What is 2+2?</p>
+                <button onclick="nextQuestion(1, 1)">4</button>
+                <button onclick="nextQuestion(1, 0)">3</button>
+            </div>
+            <div class="question-container" id="q2">
+                <p>2. What is the capital of France?</p>
+                <button onclick="nextQuestion(2, 1)">Paris</button>
+                <button onclick="nextQuestion(2, 0)">Rome</button>
+            </div>
+            <div class="question-container" id="q3">
+                <p>3. What is 5 * 6?</p>
+                <button onclick="nextQuestion(3, 1)">30</button>
+                <button onclick="nextQuestion(3, 0)">25</button>
+            </div>
+            <div class="question-container" id="q4">
+                <p>4. What is the largest ocean?</p>
+                <button onclick="nextQuestion(4, 1)">Pacific</button>
+                <button onclick="nextQuestion(4, 0)">Atlantic</button>
+            </div>
+            <div class="question-container" id="q5">
+                <p>5. Who wrote 'Hamlet'?</p>
+                <button onclick="nextQuestion(5, 1)">Shakespeare</button>
+                <button onclick="nextQuestion(5, 0)">Dickens</button>
+            </div>
+            <div class="question-container" id="q6">
+                <p>6. What is the boiling point of water?</p>
+                <button onclick="nextQuestion(6, 1)">100°C</button>
+                <button onclick="nextQuestion(6, 0)">50°C</button>
+            </div>
+            <div class="question-container" id="q7">
+                <p>7. What is 9 + 10?</p>
+                <button onclick="nextQuestion(7, 0)">21</button>
+                <button onclick="nextQuestion(7, 1)">19</button>
+            </div>
+            <div class="question-container" id="q8">
+                <p>8. What is the square root of 64?</p>
+                <button onclick="nextQuestion(8, 1)">8</button>
+                <button onclick="nextQuestion(8, 0)">6</button>
+            </div>
+            <div class="question-container" id="q9">
+                <p>9. What is the capital of Japan?</p>
+                <button onclick="nextQuestion(9, 1)">Tokyo</button>
+                <button onclick="nextQuestion(9, 0)">Beijing</button>
+            </div>
+            <div class="question-container" id="q10">
+                <p>10. What is the chemical symbol for Gold?</p>
+                <button onclick="nextQuestion(10, 1)">Au</button>
+                <button onclick="nextQuestion(10, 0)">Ag</button>
+            </div>
+        </div>
+
+        <div id="results-section" style="display: none;">
+            <h3>Your Results</h3>
+            <div class="progress-container">
+                <p>Math: <span id="math-score">0</span></p>
+                <div class="progress-bar"><div class="progress-fill blue" id="math-bar"></div></div>
+            </div>
+            <div class="progress-container">
+                <p>General Knowledge: <span id="gk-score">0</span></p>
+                <div class="progress-bar"><div class="progress-fill red" id="gk-bar"></div></div>
+            </div>
+            <div class="progress-container">
+                <p>Science: <span id="science-score">0</span></p>
+                <div class="progress-bar"><div class="progress-fill orange" id="science-bar"></div></div>
+            </div>
+            <div class="progress-container">
+                <p>Reading: <span id="reading-score">0</span></p>
+                <div class="progress-bar"><div class="progress-fill purple" id="reading-bar"></div></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let scores = { math: 0, gk: 0, science: 0, reading: 0 };
+        let currentQuestion = 1;
+        
+        function nextQuestion(questionNumber, isCorrect) {
+            if (isCorrect) {
+                if (questionNumber <= 3) scores.math++;
+                else if (questionNumber <= 6) scores.gk++;
+                else if (questionNumber <= 8) scores.science++;
+                else scores.reading++;
+            }
+
+            document.getElementById("q" + questionNumber).style.display = "none";
+
+            if (questionNumber < 10) {
+                document.getElementById("q" + (questionNumber + 1)).style.display = "block";
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById("results-section").style.display = "block";
+
+            document.getElementById("math-score").innerText = scores.math * 10 + "%";
+            document.getElementById("gk-score").innerText = scores.gk * 10 + "%";
+            document.getElementById("science-score").innerText = scores.science * 10 + "%";
+            document.getElementById("reading-score").innerText = scores.reading * 10 + "%";
+
+            document.getElementById("math-bar").style.width = scores.math * 10 + "%";
+            document.getElementById("gk-bar").style.width = scores.gk * 10 + "%";
+            document.getElementById("science-bar").style.width = scores.science * 10 + "%";
+            document.getElementById("reading-bar").style.width = scores.reading * 10 + "%";
+        }
+
+        // Start the quiz with the first question
+        document.getElementById("q1").style.display = "block";
+    </script>
+
+</body>
+</html>

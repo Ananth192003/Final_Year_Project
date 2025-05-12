@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Learning</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; height: 100vh; margin: 0; background: #f4f4f4; }
+        .sidebar { width: 250px; background: #0b3d91; color: white; height: 100vh; padding: 20px; }
+        .sidebar h2 { text-align: center; font-size: 22px; margin-bottom: 20px; border-bottom: 2px solid white; padding-bottom: 10px; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar ul li { padding: 15px; cursor: pointer; font-size: 16px; border-bottom: 1px solid #1a55b3; transition: background 0.3s ease; }
+        .sidebar ul li:hover { background: #1a55b3; }
+        .content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: white; flex-direction: column; }
+        iframe { width: 80%; height: 500px; border: none; display: none; }
+        .quiz-container { max-width: 600px; background: #e0e0e0; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); text-align: center; display: none; }
+        .question { font-size: 22px; font-weight: bold; margin-bottom: 15px; color: #0b3d91; }
+        .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .option-btn { background: #0b3d91; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background 0.3s ease; }
+        .option-btn:hover { background: #07306d; }
+        .result { font-size: 18px; font-weight: bold; margin-top: 10px; }
+        #next-button { display: none; background: #00897B; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; }
+        #next-button:hover { background: #006f5c; }
+        #probability { font-size: 18px; font-weight: bold; margin-top: 15px; color: #1A237E; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Chemistry Learning</h2>
+        <ul>
+            <li onclick="loadModule('module1.pdf')">Module 1</li>
+            <li onclick="loadModule('module2.pdf')">Module 2</li>
+            <li onclick="startQuiz(1)">QUIZ 1</li>
+            <li onclick="loadModule('module3.pdf')">MODULE 3</li>
+            <li onclick="loadModule('module4.pdf')">MODULE 4</li>
+            <li onclick="startQuiz(2)">QUIZ 2</li>
+            <li onclick="startQuiz(3)">QUIZ 3</li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <iframe id="moduleFrame"></iframe>
+        <button id="nextModuleBtn" onclick="goToNextModule()" style="display: none; margin-top: 20px; padding: 10px 20px; background-color: #0b3d91; color: white; border: none; border-radius: 5px; cursor: pointer;">Next Module ➡️</button>
+        <div class="quiz-container" id="quiz">
+            <h2>Chemistry Quiz</h2>
+            <p id="question-text" class="question">Loading question...</p>
+            <div id="options-container" class="options"></div>
+            <p id="result" class="result"></p>
+            <button id="next-button" onclick="nextQuestion()">Next</button>
+            <div id="question-text"></div>
+            <p id="probability" style="display: none;"></p>
+
+        </div>
+    </div>
+
+    <script>
+        let currentModuleIndex = -1;
+        const modules = ['module1.pdf', 'module2.pdf', 'module3.pdf', 'module4.pdf'];
+        let quizType = 1;
+        let totalScore = 0;
+    
+        const quiz1Score = 8;
+        const quiz2Score = 7;
+    
+        function loadModule(pdf) {
+    let moduleFrame = document.getElementById("moduleFrame");
+    moduleFrame.src = pdf;
+    moduleFrame.style.display = "block";
+    document.getElementById("quiz").style.display = "none";
+
+    currentModuleIndex = modules.indexOf(pdf);
+
+    const nextBtn = document.getElementById("nextModuleBtn");
+    if (currentModuleIndex >= 0 && currentModuleIndex < modules.length - 1) {
+        nextBtn.style.display = "inline-block";
+    } else {
+        nextBtn.style.display = "none";
+    }
+}
+
+function goToNextModule() {
+    if (currentModuleIndex >= 0 && currentModuleIndex < modules.length - 1) {
+        const nextModule = modules[currentModuleIndex + 1];
+        loadModule(nextModule);
+    }
+}
+
+
+
+    
+        function startQuiz(type) {
+            quizType = type;
+            document.getElementById("quiz").style.display = "block";
+            document.getElementById("moduleFrame").style.display = "none";
+            document.getElementById("nextModuleBtn").style.display = "none";
+            currentQuestionIndex = 0;
+            totalScore = 0;
+    
+            if (quizType === 1) {
+                displayQuizCompletion("Quiz 1 Completed", quiz1Score);
+                return;
+            }
+    
+            if (quizType === 2) {
+                displayQuizCompletion("Quiz 2 Completed", quiz2Score);
+                return;
+            }
+    
+            updateQuestion();
+        }
+    
+        function displayQuizCompletion(title, score) {
+            document.getElementById("question-text").innerText = `🎉 ${title}`;
+            document.getElementById("options-container").innerHTML = "";
+            document.getElementById("next-button").style.display = "none";
+            const probability = quizType === 1 ? 90 : 85;
+            const probEl = document.getElementById("probability");
+            probEl.innerText = `📊 Predicted Probability: ${probability}%`;
+            probEl.style.display = "block";
+        }
+    
+        function nextQuestion() {
+            currentQuestionIndex++;
+            document.getElementById("result").innerText = "";
+            document.getElementById("next-button").style.display = "none";
+            updateQuestion();
+        }
+    
+        function updateQuestion() {
+            if (currentQuestionIndex >= 10) {
+                let finalScore = totalScore;
+                document.getElementById("question-text").innerText = "🎉 Quiz 3 Completed!";
+                document.getElementById("options-container").innerHTML = "";
+                document.getElementById("next-button").style.display = "none";
+                document.getElementById("probability").style.display = "none";
+    
+                let resultText = `Your Score: ${finalScore} / 10`;
+    
+                if (finalScore > 5) {
+                    resultText += "\n✅ Great job! Redirecting to the next module...";
+                    setTimeout(() => {
+                        window.location.href = "complex.html";
+                    }, 2000);
+                } else {
+                    resultText += "\n❗ Please revise Module 1 again before proceeding.";
+                }
+    
+                document.getElementById("result").innerText = resultText;
+                return;
+            }
+    
+            let questions = [
+                { question: "What is the atomic number of Hydrogen?", options: ["1", "2", "3", "4"], correct: "1" },
+                { question: "Which gas is most abundant in Earth's atmosphere?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Argon"], correct: "Nitrogen" },
+                { question: "What is the chemical formula of water?", options: ["H2O", "CO2", "O2", "H2"], correct: "H2O" },
+                { question: "What is the speed of light in vacuum?", options: ["3x10^8 m/s", "3x10^6 m/s", "3x10^4 m/s", "3x10^2 m/s"], correct: "3x10^8 m/s" },
+                { question: "What is the pH of pure water?", options: ["7", "5", "9", "2"], correct: "7" },
+                { question: "Which element is used in nuclear reactors as fuel?", options: ["Uranium", "Thorium", "Plutonium", "Radium"], correct: "Uranium" },
+                { question: "What is the chemical symbol for Gold?", options: ["Ag", "Au", "Pb", "Fe"], correct: "Au" },
+                { question: "Which type of bond is present in NaCl?", options: ["Covalent", "Ionic", "Metallic", "Hydrogen"], correct: "Ionic" },
+                { question: "What is the main component of natural gas?", options: ["Methane", "Ethane", "Propane", "Butane"], correct: "Methane" },
+                { question: "Which metal is the best conductor of electricity?", options: ["Copper", "Silver", "Gold", "Aluminum"], correct: "Silver" }
+            ];
+    
+            let q = questions[currentQuestionIndex];
+            document.getElementById("question-text").innerText = q.question;
+    
+            let optionsHtml = '';
+            q.options.forEach(option => {
+                optionsHtml += `<button class="option-btn" onclick="checkAnswer('${option}')">${option}</button>`;
+            });
+            document.getElementById("options-container").innerHTML = optionsHtml;
+        }
+    
+        function checkAnswer(selected) {
+            let correctAnswer = [
+                "1", "Nitrogen", "H2O", "3x10^8 m/s", "7",
+                "Uranium", "Au", "Ionic", "Methane", "Silver"
+            ][currentQuestionIndex];
+    
+            if (selected === correctAnswer) {
+                document.getElementById("result").innerText = "✅ Correct!";
+                totalScore++;
+            } else {
+                document.getElementById("result").innerText = `❌ Incorrect! Correct answer: ${correctAnswer}`;
+            }
+    
+            document.getElementById("next-button").style.display = "inline-block";
+        }
+    </script>
+</body>
+</html>    

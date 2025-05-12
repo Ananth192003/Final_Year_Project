@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMARTLEARN</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #f4f0ed, #e6dad5);
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            background: white;
+            max-width: 900px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .left {
+            width: 50%;
+            overflow: hidden;
+            position: relative;
+        }
+        .left img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .left img:hover {
+            transform: scale(1.05);
+        }
+        .right {
+            width: 50%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .description {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .pattern-img {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .pattern-img:hover {
+            transform: rotate(3deg) scale(1.02);
+        }
+        .button {
+            background: linear-gradient(to right, #b22222, #8b1a1a);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 5px 15px rgba(178, 34, 34, 0.4);
+        }
+        .button:hover {
+            background: linear-gradient(to right, #8b1a1a, #b22222);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(178, 34, 34, 0.5);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left">
+            <img src="SMARTLEARN.png" alt="Interior Design"> <!-- Replace with actual image path -->
+        </div>
+        <div class="right">
+            <h2 class="title">SMARTLEARN</h2>
+            <p class="description">
+                SmartLearn is an interactive learning platform designed to help students transition from 10th to 12th grade with personalized study paths. It leverages AI-driven insights to enhance learning efficiency and improve cognitive skills. 🚀
+            </p>
+            <img src="SMARTLEARN.png" alt="Pattern" class="pattern-img"> <!-- Replace with actual pattern image path -->
+            <a href="new_page1.html" class="button">KNOW MORE ABOUT US</a>
+        </div>
+    </div>
+</body>
+</html>

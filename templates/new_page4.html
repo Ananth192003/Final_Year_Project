@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartLearn Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121433;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: #1f1f5e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress {
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            border: none;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #ff4c4c;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 id="question">Loading...</h2>
+    <button onclick="answer(1)">Option 1</button>
+    <button onclick="answer(2)">Option 2</button>
+    <button onclick="answer(3)">Option 3</button>
+    <button onclick="answer(4)">Option 4</button>
+</div>
+
+<div class="container" id="result" style="display:none;">
+    <h2>Your SmartLearn Score</h2>
+    <p>Writing: <span id="writing-score">0</span></p>
+    <div class="progress-bar"><div class="progress" id="writing-bar" style="background: cyan;"></div></div>
+
+    <p>Speaking: <span id="speaking-score">0</span></p>
+    <div class="progress-bar"><div class="progress" id="speaking-bar" style="background: orange;"></div></div>
+
+    <p>Reading: <span id="reading-score">0</span></p>
+    <div class="progress-bar"><div class="progress" id="reading-bar" style="background: pink;"></div></div>
+
+    <p>Math: <span id="math-score">0</span></p>
+    <div class="progress-bar"><div class="progress" id="math-bar" style="background: blue;"></div></div>
+
+    <p>Memory: <span id="memory-score">0</span></p>
+    <div class="progress-bar"><div class="progress" id="memory-bar" style="background: yellow;"></div></div>
+</div>
+
+<script>
+    const questions = [
+        "What is 2 + 2?", "Who wrote Hamlet?", "What is the capital of France?",
+        "Solve: 5 x 5", "What is H2O commonly known as?", "Largest planet in the solar system?",
+        "Who painted the Mona Lisa?", "How many continents are there?", "Square root of 64?",
+        "Fastest land animal?"
+    ];
+
+    let currentQuestion = 0;
+    let scores = { writing: 0, speaking: 0, reading: 0, math: 0, memory: 0 };
+
+    function loadQuestion() {
+        if (currentQuestion < questions.length) {
+            document.getElementById("question").innerText = questions[currentQuestion];
+        } else {
+            showResults();
+        }
+    }
+
+    function answer(option) {
+        // Assign random scores to different categories
+        scores.writing += Math.floor(Math.random() * 500);
+        scores.speaking += Math.floor(Math.random() * 500);
+        scores.reading += Math.floor(Math.random() * 500);
+        scores.math += Math.floor(Math.random() * 500);
+        scores.memory += Math.floor(Math.random() * 500);
+
+        currentQuestion++;
+        loadQuestion();
+    }
+
+    function showResults() {
+        document.querySelector(".container").style.display = "none";
+        document.getElementById("result").style.display = "block";
+
+        document.getElementById("writing-score").innerText = scores.writing;
+        document.getElementById("writing-bar").style.width = (scores.writing / 5000) * 100 + "%";
+
+        document.getElementById("speaking-score").innerText = scores.speaking;
+        document.getElementById("speaking-bar").style.width = (scores.speaking / 5000) * 100 + "%";
+
+        document.getElementById("reading-score").innerText = scores.reading;
+        document.getElementById("reading-bar").style.width = (scores.reading / 5000) * 100 + "%";
+
+        document.getElementById("math-score").innerText = scores.math;
+        document.getElementById("math-bar").style.width = (scores.math / 5000) * 100 + "%";
+
+        document.getElementById("memory-score").innerText = scores.memory;
+        document.getElementById("memory-bar").style.width = (scores.memory / 5000) * 100 + "%";
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>

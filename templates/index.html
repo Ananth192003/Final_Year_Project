@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Emotion Detection</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 30px;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+    }
+    video, canvas {
+      border: 2px solid #2d3436;
+      border-radius: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Emotion Detection System</h1>
+  <video id="video" width="224" height="224" autoplay></video>
+  <br>
+  <button onclick="captureAndPredict()">Capture & Predict</button>
+  <p id="result"></p>
+
+  <script>
+    const video = document.getElementById("video");
+
+    // Start webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      });
+
+    function captureAndPredict() {
+      const canvas = document.createElement("canvas");
+      canvas.width = 224;
+      canvas.height = 224;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvas.toDataURL("image/png");
+
+      fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: imageData })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById("result").innerText = "Error: " + data.error;
+        } else {
+          document.getElementById("result").innerText =
+            `Prediction: ${data.emotion} (${data.confidence}%)`;
+        }
+      })
+      .catch(err => {
+        console.error("Error:", err);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Concepts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            padding: 20px;
+            font-size: 2.5em;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            width: 300px;
+            border-radius: 10px;
+            transition: transform 0.3s ease, background 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .hidden-text {
+            display: none;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Explore Chemistry Concepts</h1>
+    <div class="container">
+        <div class="card" onclick="toggleText('atomic')">
+            <h2>Atomic Structure</h2>
+            <p>Understanding atoms, electrons, and quantum mechanics.</p>
+            <p class="hidden-text" id="atomic">Electrons orbit the nucleus in quantized energy levels. The quantum model replaces the classical Bohr model for better accuracy.</p>
+        </div>
+        <div class="card" onclick="toggleText('bonding')">
+            <h2>Chemical Bonding</h2>
+            <p>How atoms form stable molecules.</p>
+            <p class="hidden-text" id="bonding">Ionic bonds involve electron transfer, while covalent bonds share electrons. Hydrogen bonding significantly affects water properties.</p>
+        </div>
+        <div class="card" onclick="toggleText('thermo')">
+            <h2>Thermodynamics</h2>
+            <p>The energy changes in chemical reactions.</p>
+            <p class="hidden-text" id="thermo">Gibbs free energy determines spontaneity: ΔG = ΔH - TΔS. Negative ΔG means a reaction is spontaneous.</p>
+        </div>
+        <div class="card" onclick="toggleText('kinetics')">
+            <h2>Reaction Kinetics</h2>
+            <p>Speed of reactions and influencing factors.</p>
+            <p class="hidden-text" id="kinetics">Catalysts lower activation energy, increasing reaction rates. The Arrhenius equation models temperature dependence.</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleText(id) {
+            let text = document.getElementById(id);
+            text.style.display = text.style.display === "none" || text.style.display === "" ? "block" : "none";
+        }
+    </script>
+
+</body>
+</html>

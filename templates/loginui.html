@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartLearn Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+    }
+    .container {
+      display: flex;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 40px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      width: 90%;
+      max-width: 1000px;
+    }
+    .image-section {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-right: 30px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      margin-right: 20px;
+    }
+    .logo-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 15px;
+    }
+    .logo-container img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+    .logo-container img:hover {
+      transform: scale(1.05);
+    }
+    .login-section {
+      flex: 1;
+    }
+    .login-box {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .login-box h2 {
+      color: #00c6ff;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.9);
+    }
+    input::placeholder {
+      color: #666;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #00c6ff;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .login-btn:hover {
+      background-color: #0095f6;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4);
+    }
+    .toggle {
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #fff;
+      text-align: center;
+    }
+    .admin-add-user {
+      display: none;
+      margin-top: 25px;
+      background-color: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 15px;
+    }
+    .admin-add-user h3 {
+      color: #00ffcc;
+      margin-bottom: 10px;
+    }
+    a {
+      color: #00c6ff;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    a:hover {
+      color: #0095f6;
+    }
+    .or {
+      margin: 15px 0;
+      position: relative;
+      text-align: center;
+    }
+    .or::before,
+    .or::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 45%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .or::before {
+      left: 0;
+    }
+    .or::after {
+      right: 0;
+    }
+  </style>
+</head>
+<body onload="loadCredentials()">
+  <div class="container">
+    <div class="image-section">
+      <div class="logo-container">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SmartLearn" onerror="this.onerror=null; this.src='/static/images/logo.png';">
+      </div>
+    </div>
+    <div class="login-section">
+      <div class="toggle">
+        <label>
+          <input type="radio" name="mode" value="user" checked onchange="toggleMode()"> User
+        </label>
+        &nbsp;&nbsp;
+        <label>
+          <input type="radio" name="mode" value="admin" onchange="toggleMode()"> Admin
+        </label>
+      </div>
+      <div class="login-box">
+        <h2>Welcome to SmartLearn</h2>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button class="login-btn" onclick="login()">Login</button>
+        <p class="or">OR</p>
+        <p><a href="#">Forgot password?</a></p>
+      </div>
+
+      <div class="admin-add-user" id="addUserSection">
+        <h3>Add New User</h3>
+        <input type="text" id="newUsername" placeholder="New Username" />
+        <input type="password" id="newPassword" placeholder="New Password" />
+        <button class="login-btn" onclick="addUser()">Add User</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentMode = "user";
+    const users = {
+      UTHAY: "uthay123",
+      Pradeep: "pradeep123",
+      Shyam: "shyam123"
+    };
+
+    const admin = {
+      aathityanmariraj: "12345",
+      shashi: "12345"
+    };
+
+    function login() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      if (currentMode === "user") {
+        if (users[username] === password) {
+          localStorage.setItem("loggedInUser", username);
+          window.location.href = "/home";
+        } else {
+          alert("Invalid User Credentials!");
+        }
+      } else if (currentMode === "admin") {
+        if (admin[username] === password) {
+          localStorage.setItem("loggedInAdmin", username);
+          window.location.href = "/admin";
+        } else {
+          alert("Invalid Admin Credentials!");
+        }
+      }
+    }
+
+    function toggleMode() {
+      const selected = document.querySelector('input[name="mode"]:checked').value;
+      currentMode = selected;
+      document.getElementById("addUserSection").style.display = "none";
+      document.getElementById("username").value = "";
+      document.getElementById("password").value = "";
+    }
+
+    function addUser() {
+      const newUser = document.getElementById("newUsername").value;
+      const newPass = document.getElementById("newPassword").value;
+
+      if (newUser && newPass) {
+        users[newUser] = newPass;
+        alert(`User '${newUser}' added successfully!`);
+        document.getElementById("newUsername").value = "";
+        document.getElementById("newPassword").value = "";
+      } else {
+        alert("Please fill in both fields.");
+      }
+    }
+
+    function loadCredentials() {
+      document.getElementById("username").value = "UTHAY";
+      document.getElementById("password").value = "uthay123";
+    }
+  </script>
+</body>
+</html>

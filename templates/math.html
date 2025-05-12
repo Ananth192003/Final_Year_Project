@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maths Learning</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; height: 100vh; margin: 0; background: #f4f4f4; }
+        .sidebar { width: 250px; background: #0b3d91; color: white; height: 100vh; padding: 20px; }
+        .sidebar h2 { text-align: center; font-size: 22px; margin-bottom: 20px; border-bottom: 2px solid white; padding-bottom: 10px; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar ul li { padding: 15px; cursor: pointer; font-size: 16px; border-bottom: 1px solid #1a55b3; transition: background 0.3s ease; }
+        .sidebar ul li:hover { background: #1a55b3; }
+        .content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: white; flex-direction: column; }
+        iframe { width: 80%; height: 500px; border: none; display: none; }
+        .quiz-container { max-width: 600px; background: #e0e0e0; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); text-align: center; display: none; }
+        .question { font-size: 22px; font-weight: bold; margin-bottom: 15px; color: #0b3d91; }
+        .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .option-btn { background: #0b3d91; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background 0.3s ease; }
+        .option-btn:hover { background: #07306d; }
+        .result { font-size: 18px; font-weight: bold; margin-top: 10px; }
+        #next-button { display: none; background: #00897B; color: white; padding: 12px; border: none; border-radius: 5px; cursor: pointer; margin-top: 15px; }
+        #next-button:hover { background: #006f5c; }
+        #probability { font-size: 18px; font-weight: bold; margin-top: 15px; color: #1A237E; display: none; }
+        /* Emotion Detection Styles */
+        .emotion-section {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+        }
+        #video {
+            width: 200px;
+            height: 200px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        #emotion-result {
+            font-size: 16px;
+            margin-top: 10px;
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Maths Learning</h2>
+        <ul>
+            <li onclick="loadModule('module1.pdf')">Module 1</li>
+            <li onclick="loadModule('module2.pdf')">Module 2</li>
+            <li onclick="startQuiz(1)">QUIZ 1</li>
+            <li onclick="loadModule('module3.pdf')">MODULE 3</li>
+            <li onclick="startQuiz(2)">QUIZ 2</li>
+            <li onclick="startQuiz(3)">QUIZ 3</li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <iframe id="moduleFrame"></iframe>
+        <div class="quiz-container" id="quiz">
+            <h2>Maths Quiz</h2>
+            <p id="question-text" class="question">Loading question...</p>
+            <div id="options-container" class="options"></div>
+            <p id="result" class="result"></p>
+            <button id="next-button" onclick="nextQuestion()">Next</button>
+            <p id="probability" style="display: none;"></p>
+        </div>
+    </div>
+
+    <!-- Emotion Detection Section -->
+    <div class="emotion-section" id="emotionSection">
+        <video id="video" autoplay playsinline></video>
+        <div id="emotion-result"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById("video");
+        const emotionSection = document.getElementById("emotionSection");
+        const emotionResult = document.getElementById("emotion-result");
+        let isCameraReady = false;
+        let currentModule = 1;
+
+        // Function to request camera access
+        async function requestCameraAccess() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: 224, 
+                        height: 224,
+                        facingMode: 'user'
+                    } 
+                });
+                video.srcObject = stream;
+                isCameraReady = true;
+                await new Promise((resolve) => {
+                    video.onloadedmetadata = resolve;
+                });
+                video.play();
+            } catch (err) {
+                console.error("Error accessing webcam:", err);
+                const retry = confirm("Camera access is required to proceed. Please allow camera access and click OK to try again.");
+                if (retry) {
+                    requestCameraAccess();
+                }
+            }
+        }
+
+        async function captureAndDetectEmotion() {
+            if (!isCameraReady) {
+                const retry = confirm("Camera access is required to proceed. Please allow camera access and click OK to try again.");
+                if (retry) {
+                    await requestCameraAccess();
+                    if (!isCameraReady) return;
+                } else {
+                    return;
+                }
+            }
+
+            emotionSection.style.display = "block";
+            emotionResult.innerText = "Capturing...";
+
+            if (video.paused) {
+                await video.play();
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            try {
+                const canvas = document.createElement("canvas");
+                canvas.width = 224;
+                canvas.height = 224;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const base64Image = canvas.toDataURL('image/jpeg', 0.9);
+                
+                try {
+                    emotionResult.innerText = "Detecting emotion...";
+                    
+                    const response = await fetch("/predict", {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            image: base64Image
+                        })
+                    });
+
+                    const result = await response.json();
+                    console.log("Raw emotion detection result:", result);
+                    
+                    // Extract confidence value from the string if it's in percentage format
+                    let confidence;
+                    if (typeof result.confidence === 'string') {
+                        // Extract the number from strings like "28.15%"
+                        const match = result.confidence.match(/(\d+\.?\d*)%/);
+                        if (match) {
+                            confidence = parseFloat(match[1]) / 100;
+                            console.log("Extracted confidence from percentage:", confidence);
+                        } else {
+                            confidence = parseFloat(result.confidence);
+                            console.log("Parsed confidence from string:", confidence);
+                        }
+                    } else {
+                        confidence = result.confidence;
+                        console.log("Using confidence as is:", confidence);
+                    }
+                    
+                    console.log("Final confidence value for comparison:", confidence);
+                    console.log("Threshold for comparison:", 0.5);
+                    
+                    if (result.emotion === 'Happy' || result.emotion === 'Neutral' || result.emotion === 'Surprise' || 
+                        (result.emotion === 'Sad' && confidence < 0.5)) {
+                        let displayEmotion = result.emotion;
+                        if (result.emotion === 'Sad' && confidence < 0.5) {
+                            displayEmotion = 'Happy'; // Treat low-confidence sadness as happiness
+                            console.log("Treating low-confidence Sad as Happy");
+                        }
+                        console.log("Moving to next module with emotion:", displayEmotion);
+                        emotionResult.innerHTML = `
+                            <p style="color: green;">Great! You seem to be in a positive state (${displayEmotion}).</p>
+                            <p>Redirecting to the next module...</p>
+                        `;
+                        setTimeout(() => {
+                            if (currentModule < 3) {
+                                currentModule++;
+                                loadModule(`module${currentModule}.pdf`);
+                            } else {
+                                emotionResult.innerHTML = `
+                                    <p style="color: green;">Congratulations! You've completed all math modules! 🎉</p>
+                                    <p>Return to <a href="/home">home page</a> to explore other subjects.</p>
+                                `;
+                            }
+                            // Close the emotion section after 5 seconds
+                            setTimeout(() => {
+                                emotionSection.style.display = "none";
+                            }, 5000);
+                        }, 2000);
+                    } else {
+                        console.log("Staying on current module due to emotion/confidence:", result.emotion, confidence);
+                        emotionResult.innerHTML = `
+                            <p style="color: orange;">You seem ${result.emotion.toLowerCase()}.</p>
+                            <p>Please review the material and try again when you're feeling more positive!</p>
+                        `;
+                        // Close the emotion section after 5 seconds
+                        setTimeout(() => {
+                            emotionSection.style.display = "none";
+                        }, 5000);
+                    }
+                } catch (error) {
+                    console.error("Error detecting emotion:", error);
+                    emotionResult.innerText = "Error detecting emotion. Please try again.";
+                }
+            } catch (error) {
+                console.error("Error capturing image:", error);
+                emotionResult.innerText = "Error capturing image. Please try again.";
+            }
+        }
+
+        function loadModule(pdf) {
+            let moduleFrame = document.getElementById("moduleFrame");
+            moduleFrame.src = `/static/pdfs/${pdf}`;
+            moduleFrame.style.display = "block";
+            document.getElementById("quiz").style.display = "none";
+            
+            // Add Next Module button with emotion detection
+            const nextButton = document.createElement("button");
+            nextButton.className = "option-btn";
+            nextButton.style.marginTop = "20px";
+            nextButton.innerHTML = "Next Module 📸";
+            nextButton.onclick = captureAndDetectEmotion;
+            
+            const contentDiv = document.querySelector(".content");
+            if (!document.getElementById("nextModuleBtn")) {
+                nextButton.id = "nextModuleBtn";
+                contentDiv.appendChild(nextButton);
+            }
+        }
+
+        // Request camera access when page loads
+        requestCameraAccess();
+
+        // Rest of your existing quiz functions...
+        let currentQuestionIndex = 0;
+        let quizType = 1;
+        let totalScore = 0;
+
+        const quiz1Score = 8;
+        const quiz2Score = 7;
+
+        function startQuiz(type) {
+            quizType = type;
+            document.getElementById("quiz").style.display = "block";
+            document.getElementById("moduleFrame").style.display = "none";
+            currentQuestionIndex = 0;
+            totalScore = 0;
+
+            // Get quiz data from the server
+            const quizData = JSON.parse('{{ quiz_data|tojson|safe }}');
+            const currentQuiz = quizData[type];
+
+            if (!currentQuiz) {
+                console.error("Quiz data not found");
+                return;
+            }
+
+            // Display quiz title
+            document.getElementById("question-text").innerText = currentQuiz.title;
+            
+            // Display first question
+            updateQuestion();
+        }
+
+        function updateQuestion() {
+            const quizData = JSON.parse('{{ quiz_data|tojson|safe }}');
+            const currentQuiz = quizData[quizType];
+            const currentQuestion = currentQuiz.questions[currentQuestionIndex];
+
+            if (!currentQuestion) {
+                displayQuizCompletion();
+                return;
+            }
+
+            document.getElementById("question-text").innerText = currentQuestion.question;
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement("button");
+                button.className = "option-btn";
+                button.innerText = option;
+                button.onclick = () => checkAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById("result").innerText = "";
+            document.getElementById("next-button").style.display = "none";
+        }
+
+        function checkAnswer(selectedIndex) {
+            const quizData = JSON.parse('{{ quiz_data|tojson|safe }}');
+            const currentQuiz = quizData[quizType];
+            const currentQuestion = currentQuiz.questions[currentQuestionIndex];
+            const result = document.getElementById("result");
+
+            if (selectedIndex === currentQuestion.correct) {
+                result.innerText = "Correct!";
+                result.style.color = "green";
+                totalScore++;
+            } else {
+                result.innerText = "Incorrect!";
+                result.style.color = "red";
+            }
+
+            document.getElementById("next-button").style.display = "block";
+        }
+
+        function nextQuestion() {
+            const quizData = JSON.parse('{{ quiz_data|tojson|safe }}');
+            const currentQuiz = quizData[quizType];
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < currentQuiz.questions.length) {
+                updateQuestion();
+            } else {
+                displayQuizCompletion();
+            }
+        }
+
+        function displayQuizCompletion() {
+            const quizData = JSON.parse('{{ quiz_data|tojson|safe }}');
+            const currentQuiz = quizData[quizType];
+            const totalQuestions = currentQuiz.questions.length;
+            const scorePercentage = (totalScore / totalQuestions) * 100;
+
+            document.getElementById("question-text").innerText = `Quiz Completed!`;
+            document.getElementById("options-container").innerHTML = "";
+            document.getElementById("result").innerText = `Your score: ${totalScore}/${totalQuestions} (${scorePercentage}%)`;
+            document.getElementById("next-button").style.display = "none";
+
+            const probabilityElement = document.getElementById("probability");
+            probabilityElement.innerText = `📊 Predicted Probability: ${scorePercentage}%`;
+            probabilityElement.style.display = "block";
+        }
+
+        let questions = [
+            { question: "What is the value of π (pi) to two decimal places?", options: ["3.14", "3.16", "3.12", "3.18"], correct: "3.14" },
+            { question: "What is the square root of 144?", options: ["12", "14", "16", "18"], correct: "12" },
+            { question: "What is the sum of the angles in a triangle?", options: ["90 degrees", "180 degrees", "270 degrees", "360 degrees"], correct: "180 degrees" },
+            { question: "What is 2 to the power of 5?", options: ["16", "32", "64", "128"], correct: "32" },
+            { question: "What is the area of a circle with radius 5?", options: ["25π", "50π", "75π", "100π"], correct: "25π" },
+            { question: "What is the derivative of x²?", options: ["x", "2x", "x²", "2x²"], correct: "2x" },
+            { question: "What is the value of log₁₀(100)?", options: ["1", "2", "3", "4"], correct: "2" },
+            { question: "What is the slope of the line y = 2x + 3?", options: ["2", "3", "5", "6"], correct: "2" },
+            { question: "What is the sum of the first 10 natural numbers?", options: ["45", "50", "55", "60"], correct: "55" },
+            { question: "What is the value of sin(90°)?", options: ["0", "0.5", "1", "2"], correct: "1" }
+        ];
+    </script>
+</body>
+</html>

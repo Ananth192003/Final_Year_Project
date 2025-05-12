@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Module {{ module }}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        #pdf-container {
+            flex: 1;
+            width: 100%;
+            position: relative;
+        }
+        #pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .controls {
+            padding: 20px;
+            text-align: center;
+            background: #f4f4f4;
+            border-top: 1px solid #ddd;
+        }
+        .next-module-btn {
+            background: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            margin: 0 auto;
+        }
+        .next-module-btn:hover {
+            background: #0056b3;
+        }
+        .emotion-section {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+        }
+        #video {
+            width: 200px;
+            height: 200px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        #emotion-result {
+            font-size: 16px;
+            margin-top: 10px;
+            color: #333;
+            text-align: center;
+        }
+        .camera-icon {
+            margin-left: 8px;
+        }
+        .module-content {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .module-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .module-description {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div class="module-content">
+            <h1 class="module-title">Module {{ module }}</h1>
+            <div class="module-description">
+                {% if module == 1 %}
+                    <p>Welcome to Introduction to Mathematics! This module covers basic concepts and principles.</p>
+                {% elif module == 2 %}
+                    <p>In this module, we'll explore Advanced Algebra and Functions.</p>
+                {% elif module == 3 %}
+                    <p>This module focuses on Calculus and its Applications.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div id="pdf-container">
+            <iframe id="pdf-viewer" src="/static/pdfs/{{ pdf }}"></iframe>
+        </div>
+        
+        <div class="controls">
+            <button class="next-module-btn" onclick="captureAndDetectEmotion()">
+                Next Module
+                <span class="camera-icon">📸</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Emotion Detection Section -->
+    <div class="emotion-section" id="emotionSection">
+        <video id="video" autoplay playsinline></video>
+        <div id="emotion-result"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById("video");
+        const emotionSection = document.getElementById("emotionSection");
+        const emotionResult = document.getElementById("emotion-result");
+        let isCameraReady = false;
+
+        // Function to request camera access
+        async function requestCameraAccess() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        width: 224, 
+                        height: 224,
+                        facingMode: 'user'
+                    } 
+                });
+                video.srcObject = stream;
+                isCameraReady = true;
+                await new Promise((resolve) => {
+                    video.onloadedmetadata = resolve;
+                });
+                video.play();
+            } catch (err) {
+                console.error("Error accessing webcam:", err);
+                const retry = confirm("Camera access is required to proceed. Please allow camera access and click OK to try again.");
+                if (retry) {
+                    requestCameraAccess();
+                }
+            }
+        }
+
+        async function captureAndDetectEmotion() {
+            if (!isCameraReady) {
+                const retry = confirm("Camera access is required to proceed. Please allow camera access and click OK to try again.");
+                if (retry) {
+                    await requestCameraAccess();
+                    if (!isCameraReady) return;
+                } else {
+                    return;
+                }
+            }
+
+            emotionSection.style.display = "block";
+            emotionResult.innerText = "Capturing...";
+
+            if (video.paused) {
+                await video.play();
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            try {
+                const canvas = document.createElement("canvas");
+                canvas.width = 224;
+                canvas.height = 224;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const base64Image = canvas.toDataURL('image/jpeg', 0.9);
+                
+                try {
+                    emotionResult.innerText = "Detecting emotion...";
+                    
+                    const response = await fetch("/predict", {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            image: base64Image
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.emotion === 'Happy' || result.emotion === 'Neutral') {
+                        const nextModule = parseInt('{{ module }}') + 1;
+                        if (nextModule > 3) {  // We only have 3 modules
+                            emotionResult.innerHTML = `
+                                <p style="color: green;">Congratulations! You've completed all math modules! 🎉</p>
+                                <p>Return to <a href="/home">home page</a> to explore other subjects.</p>
+                            `;
+                        } else {
+                            emotionResult.innerHTML = `
+                                <p style="color: green;">Great! You seem to be in a positive state (${result.emotion}).</p>
+                                <p>Redirecting to the next module...</p>
+                            `;
+                            setTimeout(() => {
+                                window.location.href = `/math/${nextModule}`;
+                            }, 2000);
+                        }
+                    } else {
+                        emotionResult.innerHTML = `
+                            <p style="color: orange;">You seem ${result.emotion.toLowerCase()}.</p>
+                            <p>Take a moment to review the material and try again when you're feeling more positive!</p>
+                        `;
+                    }
+                } catch (error) {
+                    console.error("Error detecting emotion:", error);
+                    emotionResult.innerText = "Error detecting emotion. Please try again.";
+                }
+            } catch (error) {
+                console.error("Error capturing image:", error);
+                emotionResult.innerText = "Error capturing image. Please try again.";
+            }
+        }
+
+        // Request camera access when page loads
+        requestCameraAccess();
+    </script>
+</body>
+</html> 

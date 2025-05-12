@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartLearn - Match the Word</title>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #0A192F, #112240);
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .shield {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(to bottom, #FFD700, #FFA500);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border: 4px solid #FFEB3B;
+        }
+        .options {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .option {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(to bottom, #00BFA5, #00897B);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .option:hover {
+            transform: scale(1.1);
+        }
+        .dont-know {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #64FFDA;
+        }
+    </style>
+</head>
+<body>
+    <h2>SmartLearn - Match the Word</h2>
+    <p>Select the correct word for the given image.</p>
+    <div class="shield">🛡️</div>
+    <div class="options">
+        <div class="option">protrude</div>
+        <div class="option">protect</div>
+    </div>
+    <div class="dont-know">I don't know</div>
+</body>
+</html>
